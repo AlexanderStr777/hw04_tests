@@ -144,3 +144,15 @@ dmypy.json
 .history/
 
 .mypy_cache
+
+# Файлы статики
+
+static
+
+# Модуль coverage
+
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover 
