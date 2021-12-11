@@ -1,3 +1,4 @@
+# posts/views.py
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
@@ -45,15 +46,13 @@ def group_posts(request, slug):
 def profile(request, username):
     author = get_object_or_404(User, username=username)
     post_list = author.posts.all()
-    num_of_posts = post_list.count()
-    paginator = Paginator(post_list, 10)
+    paginator = Paginator(post_list, settings.PAGINATOR_VALUE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     context = {
         'author': author,
         'page_obj': page_obj,
-        'num_of_posts': num_of_posts,
     }
     return render(request, 'posts/profile.html', context)
 
@@ -63,12 +62,10 @@ def post_detail(request, post_id):
     post = Post.objects.get(id=post_id)
     author = post.author
     title = post.text[:31]
-    num_of_posts = author.posts.count()
     context = {
         'post': post,
         'author': author,
         'title': title,
-        'num_of_posts': num_of_posts,
     }
     return render(request, 'posts/post_detail.html', context)
 
@@ -76,20 +73,16 @@ def post_detail(request, post_id):
 # Страницы создания поста
 @login_required
 def post_create(request):
-    if request.method == 'POST':
-        form = PostForm(request.POST)
-        if form.is_valid():
-            listing = form.save(commit=False)
-            listing.author = request.user
-            listing.save()
+    form = PostForm(request.POST or None)
+    if form.is_valid():
+        listing = form.save(commit=False)
+        listing.author = request.user
+        listing.save()
 
-            return redirect(
-                reverse('posts:profile', args=[request.user.username]),
-            )
+        return redirect(
+            reverse('posts:profile', args=[request.user.username]),
+        )
 
-        return render(request, 'posts/create_post.html', {'form': form})
-
-    form = PostForm()
     return render(request, 'posts/create_post.html', {'form': form})
 
 

@@ -1,5 +1,6 @@
-import pytest
 from django import forms
+
+import pytest
 from posts.models import Post
 
 

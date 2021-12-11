@@ -1,27 +1,12 @@
 # posts/tests/test_urls.py
-from django.contrib.auth import get_user_model
+from http import HTTPStatus
+
 from django.test import Client, TestCase
-from posts.models import Group, Post
 
-User = get_user_model()
-
-
-class StaticURLTests(TestCase):
-    def setUp(self):
-        self.guest_client = Client()
-
-    def about_author(self):
-        """Страница об авторе доступна всем"""
-        response = self.guest_client.get('about/author/')
-        self.assertEqual(response.status_code, 200)
-
-    def about_tech(self):
-        """Страницы о технологиях доступнав всем"""
-        response = self.guest_client.get('about/tech/')
-        self.assertEqual(response.status_code, 200)
+from posts.models import Group, Post, User
 
 
-class TaskURLTests(TestCase):
+class PostURLTests(TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -43,40 +28,25 @@ class TaskURLTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
-    def test_index_url(self):
-        '''Главная страница доступна всем'''
-        response = self.guest_client.get('/')
-        self.assertEqual(response.status_code, 200)
-
-    def test_group_url(self):
-        '''Страница группы доступна всем'''
-        response = self.guest_client.get('/group/test/')
-        self.assertEqual(response.status_code, 200)
-
-    def test_profile_url(self):
-        '''Страница профиля доступна всем'''
-        response = self.guest_client.get('/profile/HasNoName/')
-        self.assertEqual(response.status_code, 200)
-
-    def test_post_url(self):
-        '''Страница поста доступна всем'''
-        response = self.guest_client.get('/posts/1/')
-        self.assertEqual(response.status_code, 200)
-
-    def test_post_edit_url(self):
-        '''Страница редактирования поста доступна автору'''
-        response = self.authorized_client.get('/posts/1/edit/')
-        self.assertEqual(response.status_code, 200)
-
-    def test_post_create_url(self):
-        '''Страница создания поста доступна авторизированным пользователям'''
-        response = self.authorized_client.get('/create/')
-        self.assertEqual(response.status_code, 200)
+    def test_url_accessing(self):
+        "Проверка доступности страниц"
+        urls = [
+            '/',
+            '/group/test/',
+            '/profile/HasNoName/',
+            '/posts/1/',
+            '/posts/1/edit/',
+            '/create/'
+        ]
+        for url in urls:
+            with self.subTest(url=url):
+                response = self.authorized_client.get(url)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_unexisting_page(self):
         '''Проверка ответа несуществующей страницы'''
         response = self.guest_client.get('/unexisting_page/')
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_urls_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""

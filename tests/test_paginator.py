@@ -1,5 +1,6 @@
-import pytest
 from django.core.paginator import Page, Paginator
+
+import pytest
 
 pytestmark = [pytest.mark.django_db]
 
